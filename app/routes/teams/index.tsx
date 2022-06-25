@@ -1,9 +1,12 @@
-import { Task } from '.prisma/client';
-import { BriefcaseIcon, PlusCircleIcon } from '@heroicons/react/solid';
-import { Form, useActionData, useLoaderData, useTransition } from 'remix';
-import { action as NewTaskAction, NewTaskActionData } from './api/task/new';
-import { loader as TaskLoader } from './api/task/get';
-import { useEffect, useRef } from 'react';
+import { Task } from ".prisma/client";
+import { BriefcaseIcon, PlusCircleIcon } from "@heroicons/react/solid";
+import { Form, useActionData, useLoaderData, useTransition } from "remix";
+import { action as NewTaskAction, NewTaskActionData } from "../api/task/new";
+import { loader as TaskLoader } from "../api/task/get";
+import { useEffect, useRef } from "react";
+import { Input } from "~/components/Input";
+import { Button } from "~/components/Button";
+import { Card } from "~/components/Card";
 
 export const loader = TaskLoader;
 export const action = NewTaskAction;
@@ -15,53 +18,69 @@ function TaskList() {
   const transition = useTransition();
 
   useEffect(() => {
-    if (transition.state == 'submitting') {
+    if (transition.state == "submitting") {
       ref.current && ref.current.reset();
     }
   }, [transition]);
 
   return (
-    <div className="bg-white shadow-md sm:mx-auto sm:max-w-lg mt-10">
-      <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+    <div className="bg-white">
+      <h1 className="text-2xl font-bold mt-5">Teams</h1>
+      <hr className="mt-2" />
+
+      <Card>
         {addAction?.formError && (
           <p className="text-red-500">{addAction?.formError}</p>
         )}
 
-        <h1 className="text-2xl font-bold">Todo List</h1>
-        <hr className="mt-2" />
-
         <Form
           ref={ref}
           method="post"
-          className="mt-5 flex rounded-md shadow-sm"
+          className="mt-5 block rounded-md shadow-sm"
         >
-          <div className="relative flex items-stretch flex-grow focus-within:z-10">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <BriefcaseIcon
+          <div>
+            <Input
+              name="task"
+              id="task"
+              placeholder="Add New Team"
+              required
+              autoComplete="off"
+              leadingIcon={
+                <BriefcaseIcon
+                  className="h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
+              }
+              trailing={
+                <Button
+                  type="submit"
+                  rr="md"
+                  leading={
+                    <PlusCircleIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  }
+                >
+                  Add
+                </Button>
+              }
+            />
+          </div>
+          <Button
+            type="submit"
+            rl="md"
+            rr="md"
+            variant="base"
+            leading={
+              <PlusCircleIcon
                 className="h-5 w-5 text-gray-400"
                 aria-hidden="true"
               />
-            </div>
-            <input
-              name="task"
-              id="task"
-              className="border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm"
-              placeholder="Add New Task"
-              required
-              autoComplete="off"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="-ml-px relative inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+            }
           >
-            <PlusCircleIcon
-              className="h-5 w-5 text-gray-400"
-              aria-hidden="true"
-            />
-            <span>Add</span>
-          </button>
+            New button test wow
+          </Button>
         </Form>
         {addAction?.fieldErrors?.task && (
           <p className="text-red-500 text-sm mt-1">
@@ -95,7 +114,7 @@ function TaskList() {
             </p>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
