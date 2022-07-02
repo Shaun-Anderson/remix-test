@@ -115,18 +115,21 @@ function TaskList() {
     <>
       <div className="flex">
         <div>
-          <h1 className="text-2xl font-bold mt-5">Tasks</h1>
+          <h1 className="text-2xl font-bold mt-5">Waitlist</h1>
           <h2 className=" text-xs text-gray-500 mt-2">
-            Tasks for interns to complete
+            User sign ups for this project.
           </h2>
-        </div>
-        <div className=" self-center ml-auto mt-5">
-          <button className="rounded-md bg-indigo-600 text-indigo-50 px-4 py-2 text-sm hover: hover:bg-indigo-700">
-            Add
-          </button>
         </div>
       </div>
       <hr className="my-5" />
+      <div className="flex gap-2 mb-2">
+        <div className="rounded-lg bg-gray-100 p-5 w-1/2">
+          <span className="text-sm text-gray-500 block">New sign ups</span>
+          <span className="text-lg">100</span>
+        </div>
+        <div className="rounded bg-gray-100 p-2 grow"></div>
+      </div>
+
       <div className="bg-white shadow sm:rounded-lg">
         <Table<Task> data={tasks} columns={columns} pagination />
       </div>

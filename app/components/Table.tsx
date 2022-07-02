@@ -269,8 +269,8 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
     <div {...getTableProps()} className="min-w-full overflow-x-auto ">
       <div className="border-b-2 border-gray-100 ">
         {/* Toolbar */}
-        <div className="p-2 flex">
-          <div className="flex">
+        <div className="p-1 flex">
+          <div className="flex items-center">
             {/* <span className="text-xs font-bold mr-4 ml-4 self-center ">
               Test table
             </span> */}
@@ -279,7 +279,7 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
               globalFilter={table.state.globalFilter}
               setGlobalFilter={table.setGlobalFilter}
             />
-            <button className=" rounded-md bg-transparent p-2 text-gray-200 hover:text-gray-500  hover:bg-gray-100 ml-2">
+            <button className=" h-fit rounded-md bg-gray-50 p-2 text-gray-200 hover:text-gray-500  hover:bg-gray-100 ml-2">
               <FilterIcon className="h-4 w-4 " aria-hidden="true" />
             </button>
           </div>

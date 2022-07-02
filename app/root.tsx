@@ -13,12 +13,13 @@ import stylesUrl from "~/styles/tailwind.css";
 import type { LinksFunction } from "remix";
 import "regenerator-runtime/runtime";
 import {
-  FilterIcon,
+  UserIcon,
   GlobeIcon,
   UserGroupIcon,
   CogIcon,
   ClipboardCheckIcon,
   CalendarIcon,
+  UsersIcon,
 } from "@heroicons/react/outline";
 
 export const meta: MetaFunction = () => {
@@ -39,7 +40,7 @@ export default function App() {
         <Links />
       </head>
       <body className="sm:flex flex-col sm:flex-row sm:min-h-screen w-full bg-gray-100">
-        <aside className="w-64 h-screen" aria-label="Sidebar">
+        <aside className="w-64 h-screen sticky top-0" aria-label="Sidebar">
           <div className="flex flex-col w-full md:w-64 text-gray-700 bg-transparent dark-mode:text-gray-200 dark-mode:bg-gray-800 flex-shrink-0">
             <div className="p-4 text-xl mt-9 ml-4 font-bold flex items-center">
               <GlobeIcon className="h-5 w-5 mr-2" aria-hidden="true" />
@@ -47,25 +48,7 @@ export default function App() {
             </div>
             <ul className="space-y-2 p-4">
               <NavLink
-                to="/teams"
-                className={({ isActive }) =>
-                  `${
-                    isActive
-                      ? "bg-white cursor-default active"
-                      : "bg-transparent hover:bg-gray-100 cursor-pointer"
-                  } flex px-4 py-2 mt-2 text-sm font-semibold text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:text-gray-900  focus:bg-gray-200 focus:outline-none focus:shadow-outline`
-                }
-              >
-                <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
-                  <UserGroupIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Teams
-                </span>
-                <span className="inline-flex justify-center items-center px-2 ml-3 text-xs font-medium text-gray-800 bg-gray-200 rounded-full dark:bg-gray-500 dark:text-gray-200">
-                  Pro
-                </span>
-              </NavLink>
-              <NavLink
-                to="/tasks"
+                to="/waitlist"
                 caseSensitive={false}
                 className={({ isActive }) =>
                   `${
@@ -80,11 +63,11 @@ export default function App() {
                     className="h-4 w-4 mr-2"
                     aria-hidden="true"
                   />
-                  Tasks
+                  Waitlist
                 </span>
               </NavLink>
               <NavLink
-                to="/teams"
+                to="/events"
                 className={({ isActive }) =>
                   `${
                     isActive
@@ -95,7 +78,7 @@ export default function App() {
               >
                 <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
                   <CalendarIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Events
+                  Roadmap
                 </span>
               </NavLink>
               <NavLink
