@@ -6,13 +6,22 @@ import {
 } from "@heroicons/react/solid";
 import { Form, useActionData, useLoaderData, useTransition } from "remix";
 import { action as NewTaskAction, NewTaskActionData } from "../api/task/new";
+import {
+  action as DeleteTaskAction,
+  DeleteTaskActionData,
+} from "../api/task/delete";
 import { loader as TaskLoader } from "../api/task/get";
-import { useEffect, useMemo, useRef } from "react";
+import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "~/components/Card";
 import { Menu } from "~/components/Menu";
 import Table from "~/components/Table";
-import { Column } from "react-table";
+import { Cell, CellProps, Column } from "react-table";
 import { Button } from "~/components/Button";
+import { roundedConstant } from "~/utils/style-constants";
+import { TrashIcon } from "@heroicons/react/outline";
+import { useModal } from "~/hooks/Modal";
+import { Dialog, Transition } from "@headlessui/react";
+import { Modal } from "~/components/Modal";
 
 export const loader = TaskLoader;
 export const action = NewTaskAction;
@@ -20,6 +29,8 @@ export const action = NewTaskAction;
 function TaskList() {
   const todos = useLoaderData<Task[]>();
   const addAction = useActionData<NewTaskActionData>();
+  const deleteAction = useActionData<DeleteTaskActionData>();
+
   const ref = useRef<HTMLFormElement>(null);
   const transition = useTransition();
 
@@ -33,57 +44,6 @@ function TaskList() {
   //   id: number;
   //   text: string;
   // }
-
-  const tasks: Task[] = [
-    { id: "1", name: "test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    {
-      id: "2",
-      name: "2123123test",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "2",
-      name: "2 tes1231t",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 tes3t", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 2321", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    {
-      id: "2",
-      name: "2 te214st",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    {
-      id: "2",
-      name: "2 te2141st",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    { id: "2", name: "2 test", createdAt: new Date(), updatedAt: new Date() },
-    { id: "2", name: "2 123", createdAt: new Date(), updatedAt: new Date() },
-    {
-      id: "2",
-      name: "2 123test",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "2",
-      name: "2 tes4124t",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
 
   const columns = useMemo(
     () =>
@@ -105,11 +65,71 @@ function TaskList() {
           width: 60,
           align: "right",
           disableSortBy: true,
-          Cell: () => <Menu />,
+          Cell: ({ row }: Cell) => (
+            <>
+              <button
+                className="relative rounded-md inline-flex items-center px-2 py-2  text-sm font-medium text-rose-400 hover:bg-rose-50"
+                onClick={() => showModal({ data: row.original })}
+              >
+                <TrashIcon className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <Menu />
+            </>
+          ),
         },
       ] as Column<Task>[],
     []
   );
+
+  const DeleteModal = memo(
+    ({
+      isOpen,
+      onClose,
+      title,
+      data,
+    }: {
+      isOpen: boolean;
+      onClose: () => void;
+      title: string;
+      data: Task;
+    }) => {
+      const deleteAction = useActionData<DeleteTaskActionData>();
+
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title={title}>
+          <form method="post" action="/api/task/delete" key={data.id}>
+            {deleteAction?.formError && (
+              <p className="text-red-500">{addAction?.formError}</p>
+            )}
+            <p>{data.name}</p>
+            <label>
+              <input name="taskId" type="text" value={data.id} />
+            </label>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+  );
+
+  const [showModal, _hideModal] = useModal(DeleteModal, {
+    title: "Delete",
+    description: "Are you sure you want to delete this?",
+  });
 
   return (
     <>
@@ -123,15 +143,15 @@ function TaskList() {
       </div>
       <hr className="my-5" />
       <div className="flex gap-2 mb-2">
-        <div className="rounded-lg bg-gray-100 p-5 w-1/2">
-          <span className="text-sm text-gray-500 block">New sign ups</span>
-          <span className="text-lg">100</span>
-        </div>
-        <div className="rounded bg-gray-100 p-2 grow"></div>
+        <Card className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-1/2 p-3 bg-opacity-50">
+          <span className="text-sm text-white block">New sign ups</span>
+          <span className="text-xl text-white opacity-80">100</span>
+        </Card>
+        <Card className=" grow border border-green-500 p-3">Test</Card>
       </div>
 
-      <div className="bg-white shadow sm:rounded-lg">
-        <Table<Task> data={tasks} columns={columns} pagination />
+      <div className="bg-white border border-gray-100 rounded-md">
+        <Table<Task> data={todos} columns={columns} pagination />
       </div>
     </>
   );

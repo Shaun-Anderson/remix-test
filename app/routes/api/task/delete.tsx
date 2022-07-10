@@ -1,7 +1,7 @@
-import { ActionFunction, json, redirect } from 'remix';
-import { db } from '~/utils/db.server';
+import { ActionFunction, json, redirect } from "remix";
+import { db } from "~/utils/db.server";
 
-// return type of this action 
+// return type of this action
 export type DeleteTaskActionData = {
   formError?: string;
   fieldErrors?: {
@@ -20,12 +20,12 @@ const badRequest = (data: DeleteTaskActionData) => {
 export const action: ActionFunction = async ({ request }) => {
   //setting values to fields from request
   const form = await request.formData();
-  type fieldType = 'taskId';
-  const fieldList: fieldType[] = ['taskId'];
+  type fieldType = "taskId";
+  const fieldList: fieldType[] = ["taskId"];
   const fields = {} as Record<fieldType, string>;
 
   for (const fieldName of fieldList) {
-    const fieldValue = form.get(fieldName) || '';
+    const fieldValue = form.get(fieldName) || "";
     fields[fieldName] = fieldValue as string;
   }
 
@@ -33,7 +33,7 @@ export const action: ActionFunction = async ({ request }) => {
   let fieldErrors = {} as Record<fieldType, string>;
 
   if (!fields.taskId) {
-    fieldErrors.taskId = 'No Task Id provided';
+    fieldErrors.taskId = "No Task Id provided";
     return badRequest({ fieldErrors, fields });
   }
 
@@ -49,5 +49,5 @@ export const action: ActionFunction = async ({ request }) => {
       formError: err.message,
     });
   }
-  return redirect('/');
+  return json({ ok: true });
 };

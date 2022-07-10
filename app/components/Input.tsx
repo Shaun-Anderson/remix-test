@@ -34,7 +34,7 @@ export const Input = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`h-8 border grow border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block rounded-${rounded} ${
+          className={`h-8 border grow border-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block rounded-${rounded} ${
             leadingIcon ? "pl-8 pr-4" : "px-4"
           } text-sm w-full disabled:text-gray-100 disabled:bg-gray-50`}
         />

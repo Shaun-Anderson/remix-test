@@ -1,13 +1,13 @@
 import { Menu as BaseMenu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { DotsVerticalIcon } from "@heroicons/react/solid";
+import { DotsVerticalIcon } from "@heroicons/react/outline";
 
 export const Menu = () => {
   return (
     <BaseMenu as="div" className="relative inline-block text-left">
       <div>
         <BaseMenu.Button className="inline-flex w-full justify-center rounded-md bg-transparent px-2 py-2 text-sm font-medium text-violet-200 hover:text-indigo-500 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-          <DotsVerticalIcon className=" h-3 w-3 " aria-hidden="true" />
+          <DotsVerticalIcon className=" h-4 w-4 " aria-hidden="true" />
         </BaseMenu.Button>
       </div>
       <Transition

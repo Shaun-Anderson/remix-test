@@ -1,5 +1,4 @@
 import {
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -13,14 +12,14 @@ import stylesUrl from "~/styles/tailwind.css";
 import type { LinksFunction } from "remix";
 import "regenerator-runtime/runtime";
 import {
-  UserIcon,
   GlobeIcon,
-  UserGroupIcon,
   CogIcon,
   ClipboardCheckIcon,
   CalendarIcon,
-  UsersIcon,
 } from "@heroicons/react/outline";
+import { roundedConstant } from "./utils/style-constants";
+import { PropsWithChildren } from "react";
+import { ModalProvider } from "./hooks/Modal";
 
 export const meta: MetaFunction = () => {
   return { title: "New Remix App" };
@@ -28,6 +27,32 @@ export const meta: MetaFunction = () => {
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
+};
+
+interface CustomNavLinkProps {
+  to: string;
+}
+
+const CustomNavLink: React.FC<PropsWithChildren<CustomNavLinkProps>> = (
+  props
+) => {
+  return (
+    <NavLink
+      to={props.to}
+      caseSensitive={false}
+      className={({ isActive }) =>
+        `${
+          isActive
+            ? "bg-white cursor-default active"
+            : "bg-transparent hover:bg-gray-100 cursor-pointer"
+        } flex px-4 py-2 mt-2 text-sm font-semibold text-gray-800 ${roundedConstant} hover:bg-gray-50  hover:text-gray-900 focus:text-gray-900  focus:bg-gray-200 focus:outline-none focus:shadow-outline`
+      }
+    >
+      <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
+        {props.children}
+      </span>
+    </NavLink>
+  );
 };
 
 export default function App() {
@@ -47,61 +72,29 @@ export default function App() {
               <span>Orbit</span>
             </div>
             <ul className="space-y-2 p-4">
-              <NavLink
-                to="/waitlist"
-                caseSensitive={false}
-                className={({ isActive }) =>
-                  `${
-                    isActive
-                      ? "bg-white cursor-default active"
-                      : "bg-transparent hover:bg-gray-100 cursor-pointer"
-                  } flex px-4 py-2 mt-2 text-sm font-semibold text-gray-900 rounded-lg  hover:text-gray-900 focus:text-gray-900  focus:bg-gray-200 focus:outline-none focus:shadow-outline`
-                }
-              >
-                <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
-                  <ClipboardCheckIcon
-                    className="h-4 w-4 mr-2"
-                    aria-hidden="true"
-                  />
-                  Waitlist
-                </span>
-              </NavLink>
-              <NavLink
-                to="/events"
-                className={({ isActive }) =>
-                  `${
-                    isActive
-                      ? "bg-white cursor-default active"
-                      : "bg-transparent hover:bg-gray-100 cursor-pointer"
-                  } flex px-4 py-2 mt-2 text-sm font-semibold text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:text-gray-900  focus:bg-gray-200 focus:outline-none focus:shadow-outline`
-                }
-              >
-                <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
-                  <CalendarIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Roadmap
-                </span>
-              </NavLink>
-              <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                  `${
-                    isActive
-                      ? "bg-white cursor-default active"
-                      : "bg-transparent hover:bg-gray-100 cursor-pointer"
-                  } flex px-4 py-2 mt-2 text-sm font-semibold text-gray-800 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:text-gray-900  focus:bg-gray-200 focus:outline-none focus:shadow-outline`
-                }
-              >
-                <span className="flex-1 ml-1 whitespace-nowrap flex items-center">
-                  <CogIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Settings
-                </span>
-              </NavLink>
+              <CustomNavLink to="/waitlist">
+                <ClipboardCheckIcon
+                  className="h-4 w-4 mr-2"
+                  aria-hidden="true"
+                />
+                Waitlist
+              </CustomNavLink>
+              <CustomNavLink to="/events">
+                <CalendarIcon className="h-4 w-4 mr-2" aria-hidden="true" />
+                Events
+              </CustomNavLink>
+              <CustomNavLink to="/settings">
+                <CogIcon className="h-4 w-4 mr-2" aria-hidden="true" />
+                Settings
+              </CustomNavLink>
             </ul>
           </div>
         </aside>
         <main className="grow p-5 bg-white m-1 rounded-lg flex justify-center items-center">
           <div className=" max-w-3xl h-full w-full">
-            <Outlet />
+            <ModalProvider>
+              <Outlet />
+            </ModalProvider>
           </div>
         </main>
         <ScrollRestoration />

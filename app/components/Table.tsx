@@ -279,15 +279,15 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
               globalFilter={table.state.globalFilter}
               setGlobalFilter={table.setGlobalFilter}
             />
-            <button className=" h-fit rounded-md bg-gray-50 p-2 text-gray-200 hover:text-gray-500  hover:bg-gray-100 ml-2">
+            <button className=" h-fit rounded-md p-2 text-gray-400 hover:text-gray-500  hover:bg-gray-100 ml-2">
               <FilterIcon className="h-4 w-4 " aria-hidden="true" />
             </button>
           </div>
           <div className=" ml-auto">
-            <button className=" rounded-md bg-transparent text-gray-200 hover:text-gray-500  p-2 hover:bg-gray-100">
+            <button className=" rounded-md bg-transparent text-gray-400 hover:text-gray-500  p-2 hover:bg-gray-100">
               <DownloadIcon className="h-4 w-4 " aria-hidden="true" />
             </button>
-            <button className=" rounded-md bg-transparent p-2 text-gray-200 hover:text-gray-500 hover:bg-gray-100">
+            <button className=" rounded-md bg-transparent p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100">
               <DotsVerticalIcon className="h-4 w-4 " aria-hidden="true" />
             </button>
           </div>
@@ -340,28 +340,28 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
         {props.pagination && (
           <div className="pagination p-1 flex gap-1 items-center">
             <button
-              className="relative rounded-md inline-flex items-center px-2 py-2  bg-gray-50 disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
               onClick={() => table.gotoPage(0)}
               disabled={!table.canPreviousPage}
             >
               <ChevronDoubleLeftIcon className="h-4 w-4" aria-hidden="true" />
             </button>{" "}
             <button
-              className="relative rounded-md inline-flex items-center px-2 py-2  bg-gray-50 disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
               onClick={() => table.previousPage()}
               disabled={!table.canPreviousPage}
             >
               <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
             </button>{" "}
             <button
-              className="relative rounded-md inline-flex items-center px-2 py-2  bg-gray-50 disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
               onClick={() => table.nextPage()}
               disabled={!table.canNextPage}
             >
               <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
             </button>{" "}
             <button
-              className="relative rounded-md inline-flex items-center px-2 py-2 bg-gray-50 disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-500 hover:bg-gray-50"
+              className="relative rounded-md inline-flex items-center px-2 py-2  disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
               onClick={() => table.gotoPage(table.pageCount - 1)}
               disabled={!table.canNextPage}
             >
@@ -390,6 +390,7 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
               onChange={(e) => {
                 table.setPageSize(Number(e.target.value));
               }}
+              className="text-xs border rounded-md ml-auto p-1"
             >
               {[10, 20, 30, 40, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
