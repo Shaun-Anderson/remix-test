@@ -1,7 +1,7 @@
-import { ActionFunction, json } from 'remix';
-import { db } from '~/utils/db.server';
+import { ActionFunction, json, redirect } from "remix";
+import { db } from "~/utils/db.server";
 
-// return type of this action 
+// return type of this action
 export type NewTaskActionData = {
   formError?: string;
   fieldErrors?: {
@@ -20,12 +20,13 @@ const badRequest = (data: NewTaskActionData) => {
 export const action: ActionFunction = async ({ request }) => {
   //setting values to fields from request
   const form = await request.formData();
-  type fieldType = 'task';
-  const fieldList: fieldType[] = ['task'];
+
+  type fieldType = "task";
+  const fieldList: fieldType[] = ["task"];
   const fields = {} as Record<fieldType, string>;
 
   for (const fieldName of fieldList) {
-    const fieldValue = form.get(fieldName) || '';
+    const fieldValue = form.get(fieldName) || "";
     fields[fieldName] = fieldValue as string;
   }
 
@@ -33,11 +34,15 @@ export const action: ActionFunction = async ({ request }) => {
   let fieldErrors = {} as Record<fieldType, string>;
 
   if (!fields.task) {
-    fieldErrors.task = 'Task cannot be empty';
-    return badRequest({ fieldErrors, fields });
+    fieldErrors.task = "Task cannot be empty";
+    // return json({ errors: fieldErrors, values: fields });
+    return badRequest({
+      fieldErrors,
+      fields,
+    });
   }
 
-   //adding task to database
+  //adding task to database
   try {
     await db.task.create({
       data: {
@@ -45,10 +50,10 @@ export const action: ActionFunction = async ({ request }) => {
       },
     });
   } catch (err) {
-    console.log('Error', err);
+    console.log("Error", err);
     return badRequest({
       formError: err.message,
     });
   }
-  return json({ ok: true });
+  return redirect("/waitlist");
 };

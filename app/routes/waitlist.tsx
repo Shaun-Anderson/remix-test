@@ -4,13 +4,20 @@ import {
   DotsVerticalIcon,
   PlusCircleIcon,
 } from "@heroicons/react/solid";
-import { Form, useActionData, useLoaderData, useTransition } from "remix";
-import { action as NewTaskAction, NewTaskActionData } from "../api/task/new";
+import {
+  Form,
+  Outlet,
+  useActionData,
+  useLoaderData,
+  useNavigate,
+  useTransition,
+} from "remix";
+import { action as NewTaskAction, NewTaskActionData } from "./api/task/new";
 import {
   action as DeleteTaskAction,
   DeleteTaskActionData,
-} from "../api/task/delete";
-import { loader as TaskLoader } from "../api/task/get";
+} from "./api/task/delete";
+import { loader as TaskLoader } from "./api/task/get";
 import { Fragment, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "~/components/Card";
 import { Menu } from "~/components/Menu";
@@ -22,23 +29,16 @@ import { TrashIcon } from "@heroicons/react/outline";
 import { useModal } from "~/hooks/Modal";
 import { Dialog, Transition } from "@headlessui/react";
 import { Modal } from "~/components/Modal";
+import { Menu as BaseMenu } from "@headlessui/react";
 
 export const loader = TaskLoader;
 export const action = NewTaskAction;
 
-function TaskList() {
+function Waitlist() {
   const todos = useLoaderData<Task[]>();
   const addAction = useActionData<NewTaskActionData>();
   const deleteAction = useActionData<DeleteTaskActionData>();
-
-  const ref = useRef<HTMLFormElement>(null);
-  const transition = useTransition();
-
-  useEffect(() => {
-    if (transition.state == "submitting") {
-      ref.current && ref.current.reset();
-    }
-  }, [transition]);
+  const navigate = useNavigate();
 
   // interface Task {
   //   id: number;
@@ -55,81 +55,64 @@ function TaskList() {
           minWidth: 60,
           width: 60,
         },
+
         {
           Header: "Name",
           accessor: "name",
+          maxWidth: 200,
+          minWidth: 100,
+        },
+        {
+          Header: "Name",
+          accessor: "n",
+          maxWidth: 200,
+          minWidth: 100,
         },
         {
           Header: "Actions",
           accessor: "actions",
-          width: 60,
+          width: 80,
           align: "right",
           disableSortBy: true,
           Cell: ({ row }: Cell) => (
             <>
               <button
                 className="relative rounded-md inline-flex items-center px-2 py-2  text-sm font-medium text-rose-400 hover:bg-rose-50"
-                onClick={() => showModal({ data: row.original })}
+                onClick={() => navigate(`${row.original.id}/delete`)}
               >
                 <TrashIcon className="h-4 w-4" aria-hidden="true" />
               </button>
-              <Menu />
+              <Menu>
+                <BaseMenu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => navigate(`${row.original.id}/edit`)}
+                      className={`${
+                        active ? "bg-indigo-600 text-white" : "text-gray-900"
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    >
+                      Edit
+                    </button>
+                  )}
+                </BaseMenu.Item>
+                <BaseMenu.Item>
+                  {({ active }) => (
+                    <button
+                      className={`${
+                        active ? "bg-violet-500 text-white" : "text-gray-900"
+                      } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                    >
+                      Duplicate
+                    </button>
+                  )}
+                </BaseMenu.Item>
+              </Menu>
             </>
           ),
         },
       ] as Column<Task>[],
     []
   );
-
-  const DeleteModal = memo(
-    ({
-      isOpen,
-      onClose,
-      title,
-      data,
-    }: {
-      isOpen: boolean;
-      onClose: () => void;
-      title: string;
-      data: Task;
-    }) => {
-      const deleteAction = useActionData<DeleteTaskActionData>();
-
-      return (
-        <Modal isOpen={isOpen} onClose={onClose} title={title}>
-          <form method="post" action="/api/task/delete" key={data.id}>
-            {deleteAction?.formError && (
-              <p className="text-red-500">{addAction?.formError}</p>
-            )}
-            <p>{data.name}</p>
-            <label>
-              <input name="taskId" type="text" value={data.id} />
-            </label>
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                onClick={onClose}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </Modal>
-      );
-    }
-  );
-
-  const [showModal, _hideModal] = useModal(DeleteModal, {
-    title: "Delete",
-    description: "Are you sure you want to delete this?",
-  });
 
   return (
     <>
@@ -139,6 +122,14 @@ function TaskList() {
           <h2 className=" text-xs text-gray-500 mt-2">
             User sign ups for this project.
           </h2>
+        </div>
+        <div className="ml-auto flex items-center">
+          <button
+            className="inline-flex mt-5 justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            onClick={() => navigate("new")}
+          >
+            Add
+          </button>
         </div>
       </div>
       <hr className="my-5" />
@@ -153,8 +144,9 @@ function TaskList() {
       <div className="bg-white border border-gray-100 rounded-md">
         <Table<Task> data={todos} columns={columns} pagination />
       </div>
+      <Outlet />
     </>
   );
 }
 
-export default TaskList;
+export default Waitlist;

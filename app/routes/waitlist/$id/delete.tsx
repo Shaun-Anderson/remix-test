@@ -2,22 +2,29 @@ import { Task } from ".prisma/client";
 import { XIcon } from "@heroicons/react/solid";
 import {
   Form,
+  LoaderFunction,
   useActionData,
   useLoaderData,
   useNavigate,
+  useParams,
   useTransition,
 } from "remix";
-import { action as NewTaskAction, NewTaskActionData } from "../api/task/new";
+import {
+  action as TaskAction,
+  DeleteTaskActionData,
+} from "../../api/task/delete";
 import { Fragment, useEffect, useMemo, useRef } from "react";
 import { Menu } from "~/components/Menu";
 import { Column } from "react-table";
 import { Transition, Dialog } from "@headlessui/react";
 import { Input } from "~/components/Input";
 
-export const action = NewTaskAction;
+export const action = TaskAction;
 
-function TaskList() {
-  const addAction = useActionData<NewTaskActionData>();
+const DeleteModal = () => {
+  const params = useParams();
+  const id = params.id;
+  const addAction = useActionData<DeleteTaskActionData>();
   const ref = useRef<HTMLFormElement>(null);
   const transition = useTransition();
   const navigate = useNavigate();
@@ -27,6 +34,11 @@ function TaskList() {
       ref.current && ref.current.reset();
     }
   }, [transition]);
+
+  // interface Task {
+  //   id: number;
+  //   text: string;
+  // }
 
   function onClose() {
     navigate("/waitlist");
@@ -59,12 +71,12 @@ function TaskList() {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-md bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex">
+                <div className="flex items-center">
                   <Dialog.Title
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Add Item
+                    Delete Item
                   </Dialog.Title>
                   <div className=" ml-auto">
                     <button
@@ -75,15 +87,18 @@ function TaskList() {
                     </button>
                   </div>
                 </div>
-                <Form method="post" className="mt-4">
+                <Dialog.Description className="text-sm my-4">
+                  Delete this item?
+                </Dialog.Description>
+                <Form method="post">
                   {addAction?.formError && (
                     <p className="text-red-500">{addAction?.formError}</p>
                   )}
                   <label>
-                    <Input name="task" placeholder="Task Description" />
-                    {addAction?.fieldErrors?.task && (
+                    <input name="taskId" value={id} readOnly hidden />
+                    {addAction?.fieldErrors?.taskId && (
                       <p className="text-red-500 text-sm mt-1">
-                        {addAction?.fieldErrors?.task}
+                        {addAction?.fieldErrors?.taskId}
                       </p>
                     )}
                   </label>
@@ -97,11 +112,11 @@ function TaskList() {
                     </button>
                     <button
                       type="submit"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-rose-100 px-4 py-2 text-sm font-medium text-rose-900 hover:bg-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                     >
                       {transition.state === "submitting"
-                        ? "Creating..."
-                        : "Create"}
+                        ? "Deleting..."
+                        : "Delete"}
                     </button>
                   </div>
                 </Form>{" "}
@@ -112,6 +127,6 @@ function TaskList() {
       </Dialog>
     </Transition>
   );
-}
+};
 
-export default TaskList;
+export default DeleteModal;

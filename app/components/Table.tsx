@@ -30,6 +30,8 @@ import {
 } from "@heroicons/react/outline";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import { ExportMenu } from "./ExportMenu";
+import FilterPanel from "./FilterPanel";
 
 type PrimitiveType = string | Symbol | number | boolean;
 
@@ -237,8 +239,9 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
                   <div
                     {...cell.getCellProps({
                       style: {
-                        // minWidth: cell.column.minWidth,
-                        // width: cell.column.width,
+                        minWidth: cell.column.minWidth,
+                        width: cell.column.width,
+                        overflow: "hidden",
                         justifyContent:
                           cell.column.align === "right"
                             ? "flex-end"
@@ -266,7 +269,7 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
   };
 
   return (
-    <div {...getTableProps()} className="min-w-full overflow-x-auto ">
+    <div {...getTableProps()} className="min-w-full overflow-visible ">
       <div className="border-b-2 border-gray-100 ">
         {/* Toolbar */}
         <div className="p-1 flex">
@@ -279,14 +282,10 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
               globalFilter={table.state.globalFilter}
               setGlobalFilter={table.setGlobalFilter}
             />
-            <button className=" h-fit rounded-md p-2 text-gray-400 hover:text-gray-500  hover:bg-gray-100 ml-2">
-              <FilterIcon className="h-4 w-4 " aria-hidden="true" />
-            </button>
+            <FilterPanel />
           </div>
           <div className=" ml-auto">
-            <button className=" rounded-md bg-transparent text-gray-400 hover:text-gray-500  p-2 hover:bg-gray-100">
-              <DownloadIcon className="h-4 w-4 " aria-hidden="true" />
-            </button>
+            <ExportMenu />
             <button className=" rounded-md bg-transparent p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100">
               <DotsVerticalIcon className="h-4 w-4 " aria-hidden="true" />
             </button>
@@ -298,12 +297,17 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
               // Aplicamos las propiedades de ordenación a cada columna
               <div
                 {...column.getHeaderProps({
-                  // style: { minWidth: column.minWidth, width: column.width },
+                  style: {
+                    minWidth: column.minWidth,
+                    width: column.width,
+                  },
                   ...column.getSortByToggleProps(),
                 })}
                 className={`${
                   column.isSorted ? (column.isSortedDesc ? "desc" : "asc") : ""
-                } group px-6 py-2 text-left text-xs font-medium text-gray-400 tracking-wider relative select-none `}
+                } ${
+                  column.align === "right" ? "justify-end" : "justify-start"
+                } group px-6 py-2 flex text-left text-xs font-medium text-gray-400 tracking-wider  select-none `}
               >
                 {column.canSort ? (
                   <div className="flex items-center justify-between">
@@ -331,7 +335,6 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
       </div>
       {/* Apply the table body props */}
       <div {...getTableBodyProps()}>
-        {console.log(table.page)}
         {props.pagination ? PageRowRender(table) : RowRender(table)}
         {/*
         Pagination can be built however you'd like.

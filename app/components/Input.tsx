@@ -16,6 +16,7 @@ export const Input = ({
   placeholder,
   trailing,
   label,
+  defaultValue,
 }: InputProps) => {
   return (
     <div className={className}>
@@ -32,10 +33,11 @@ export const Input = ({
           name={name}
           disabled={disabled}
           value={value}
+          defaultValue={defaultValue}
           onChange={onChange}
           placeholder={placeholder}
-          className={`h-8 border grow border-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block rounded-${rounded} ${
-            leadingIcon ? "pl-8 pr-4" : "px-4"
+          className={`h-10 border grow border-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block rounded-${rounded} ${
+            leadingIcon ? "pl-8 pr-4" : "px-3"
           } text-sm w-full disabled:text-gray-100 disabled:bg-gray-50`}
         />
         {trailing && trailing}
