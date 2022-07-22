@@ -19,6 +19,11 @@ export interface CustomField {
   required: boolean;
 }
 
+export interface Type {
+  id: string;
+  name: string;
+  email: string
+
 /* 
 waitlists : {
   {

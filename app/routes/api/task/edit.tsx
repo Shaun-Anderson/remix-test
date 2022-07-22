@@ -5,10 +5,12 @@ import { db } from "~/utils/db.server";
 export type EditTaskActionData = {
   formError?: string;
   fieldErrors?: {
-    task?: string;
+    name?: string;
+    email?: string;
   };
   fields?: {
-    task?: string;
+    name?: string;
+    email?: string;
   };
   ok?: boolean;
 };
@@ -21,8 +23,8 @@ export const action: ActionFunction = async ({ request }) => {
   //setting values to fields from request
   const form = await request.formData();
 
-  type fieldType = "task" | "id";
-  const fieldList: fieldType[] = ["task", "id"];
+  type fieldType = "name" | "id" | "email";
+  const fieldList: fieldType[] = ["name", "id", "email"];
   const fields = {} as Record<fieldType, string>;
 
   for (const fieldName of fieldList) {
@@ -33,8 +35,8 @@ export const action: ActionFunction = async ({ request }) => {
   //validation
   let fieldErrors = {} as Record<fieldType, string>;
 
-  if (!fields.task) {
-    fieldErrors.task = "Task cannot be empty";
+  if (!fields.name) {
+    fieldErrors.name = "Task cannot be empty";
     // return json({ errors: fieldErrors, values: fields });
     return badRequest({
       fieldErrors,
@@ -47,7 +49,8 @@ export const action: ActionFunction = async ({ request }) => {
     await db.task.update({
       where: { id: fields.id },
       data: {
-        name: fields.task,
+        name: fields.name,
+        email: fields.email,
       },
     });
   } catch (err) {

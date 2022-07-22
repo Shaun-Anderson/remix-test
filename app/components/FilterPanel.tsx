@@ -1,7 +1,9 @@
 import { Popover, Transition } from "@headlessui/react";
 import { FilterIcon } from "@heroicons/react/outline";
 import { ChevronDownIcon } from "@heroicons/react/solid";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { ColumnInstance, Filters, IdType } from "react-table";
+import { Input } from "./Input";
 
 const solutions = [
   {
@@ -24,11 +26,21 @@ const solutions = [
   },
 ];
 
-export default function FilterPanel() {
+export default function FilterPanel<T extends object>({
+  setFilter,
+  setAllFilters,
+  filters,
+}: {
+  setFilter: (columnId: IdType<T>, updater: any) => void;
+  setAllFilters: (
+    updater: Filters<T> | ((filters: Filters<T>) => Filters<T>)
+  ) => void;
+  filters: Filters<T>;
+}) {
   return (
     <div className="">
       <Popover className="relative">
-        {({ open }) => (
+        {({ open, close }) => (
           <>
             <Popover.Button
               className={`
@@ -46,10 +58,22 @@ export default function FilterPanel() {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute left-1/2 z-10 mt-3 w-screen max-w-sm -translate-x-1/2 transform px-4 sm:px-0 lg:max-w-3xl">
+              <Popover.Panel className="absolute left-1/2 z-10 mt-3 w-screen max-w-sm -translate-x-1/2 transform px-4 sm:px-0 ">
                 <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                  <div className="relative grid gap-8 bg-white p-7 lg:grid-cols-2">
-                    {solutions.map((item) => (
+                  <div className="relative grid gap-4 bg-white p-4">
+                    <div className="text-sm text-gray-500">Filters</div>
+                    <hr></hr>
+                    <Input
+                      placeholder="Name"
+                      value={filters.find((x) => x.id === "name")?.value ?? ""}
+                      onChange={(e) => setFilter("name", e.target.value)}
+                    />
+                    <Input
+                      placeholder="Email"
+                      value={filters.find((x) => x.id === "email")?.value ?? ""}
+                      onChange={(e) => setFilter("email", e.target.value)}
+                    />
+                    {/* {solutions.map((item) => (
                       <a
                         key={item.name}
                         href={item.href}
@@ -67,22 +91,17 @@ export default function FilterPanel() {
                           </p>
                         </div>
                       </a>
-                    ))}
+                    ))} */}
                   </div>
                   <div className="bg-gray-50 p-4">
-                    <a
-                      href="##"
-                      className="flow-root rounded-md px-2 py-2 transition duration-150 ease-in-out hover:bg-gray-100 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                    <button
+                      className="text-gray-500 hover:underline text-sm"
+                      onClick={() => {
+                        setAllFilters([]);
+                      }}
                     >
-                      <span className="flex items-center">
-                        <span className="text-sm font-medium text-gray-900">
-                          Documentation
-                        </span>
-                      </span>
-                      <span className="block text-sm text-gray-500">
-                        Start integrating products and tools
-                      </span>
-                    </a>
+                      Clear filters
+                    </button>
                   </div>
                 </div>
               </Popover.Panel>

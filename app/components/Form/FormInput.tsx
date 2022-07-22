@@ -1,11 +1,12 @@
 import { BriefcaseIcon, PlusCircleIcon } from "@heroicons/react/solid";
 import { ReactNode } from "react";
-import { useController, UseControllerProps } from "react-hook-form";
+import { FieldError, useController, UseControllerProps } from "react-hook-form";
 interface InputProps<T>
   extends Omit<React.HTMLProps<HTMLInputElement>, "defaultValue" | "name"> {
   leadingIcon?: ReactNode;
   trailing?: ReactNode;
   rounded?: "xs" | "sm" | "md" | "lg";
+  error?: FieldError;
 }
 interface FormInputProps<T> extends InputProps<T>, UseControllerProps<T> {}
 export const FormInput = (props: FormInputProps<T>) => {
@@ -33,6 +34,7 @@ export const FormInput = (props: FormInputProps<T>) => {
           name={name}
           disabled={props.disabled}
           value={value}
+          // defaultValue={props.defaultValue}
           onChange={onChange}
           placeholder={props.placeholder}
           className={`h-10 border grow border-gray-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500  rounded-${
@@ -43,6 +45,9 @@ export const FormInput = (props: FormInputProps<T>) => {
         />
         {props.trailing && props.trailing}
       </div>
+      {props.error && (
+        <p className="text-xs text-rose-500 mt-2">{props.error?.message}</p>
+      )}
     </div>
   );
 };

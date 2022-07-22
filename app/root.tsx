@@ -18,7 +18,7 @@ import {
   CalendarIcon,
 } from "@heroicons/react/outline";
 import { roundedConstant } from "./utils/style-constants";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, Suspense } from "react";
 import { ModalProvider } from "./hooks/Modal";
 
 export const meta: MetaFunction = () => {
@@ -38,6 +38,7 @@ const CustomNavLink: React.FC<PropsWithChildren<CustomNavLinkProps>> = (
 ) => {
   return (
     <NavLink
+      prefetch="intent"
       to={props.to}
       caseSensitive={false}
       className={({ isActive }) =>

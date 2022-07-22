@@ -40,20 +40,22 @@ const EditModal = () => {
     }
   }, [transition]);
 
-  // interface Task {
-  //   id: number;
-  //   text: string;
-  // }
-
   const schema = yup
     .object()
     .shape({
       name: yup.string().required(),
+      email: yup.string().email().required(),
       id: yup.string().required(),
     })
     .required();
 
-  const { handleSubmit, control, watch, setValue } = useForm<Task>({
+  const {
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<Task>({
     resolver: yupResolver(schema),
     defaultValues: data,
   });
@@ -74,7 +76,7 @@ const EditModal = () => {
     <Modal isOpen={true} onClose={onClose} title={"Edit Item"}>
       <Form
         method="post"
-        className="mt-4"
+        className=" grid grid-cols-1 gap-4"
         onSubmit={handleSubmit(onSubmit, onError)}
       >
         {actionData?.formError && (
@@ -88,18 +90,26 @@ const EditModal = () => {
           hidden
         />
         <FormInput
-          label="Description"
+          label="Name"
           control={control}
-          name="task"
+          error={errors.name}
+          name="name"
           placeholder="Task Description"
-          defaultValue={data.name}
+          // defaultValue={data.name}
         />
-
         {actionData?.fieldErrors?.task && (
           <p className="text-red-500 text-sm mt-1">
             {actionData?.fieldErrors?.task}
           </p>
         )}
+        <FormInput
+          label="Email"
+          control={control}
+          type="email"
+          name="email"
+          placeholder="Email"
+          error={errors.email}
+        />
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"

@@ -63,8 +63,8 @@ function Waitlist() {
           minWidth: 100,
         },
         {
-          Header: "Name",
-          accessor: "n",
+          Header: "Email",
+          accessor: "email",
           maxWidth: 200,
           minWidth: 100,
         },

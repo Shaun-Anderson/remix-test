@@ -7,6 +7,7 @@ import {
   useFlexLayout,
   useAsyncDebounce,
   UseGlobalFiltersOptions,
+  useFilters,
   useGlobalFilter,
   CellProps,
   HeaderProps,
@@ -14,6 +15,7 @@ import {
   useRowSelect,
   usePagination,
   TableInstance,
+  HeaderGroup,
 } from "react-table";
 import {
   ArrowDownIcon,
@@ -32,6 +34,7 @@ import { Input } from "./Input";
 import { Button } from "./Button";
 import { ExportMenu } from "./ExportMenu";
 import FilterPanel from "./FilterPanel";
+import generateExcel from "zipcelx";
 
 type PrimitiveType = string | Symbol | number | boolean;
 
@@ -155,6 +158,7 @@ interface TableProps<T extends object> extends TableOptions<T> {
 export default function Table<T extends MinTableItem>(props: TableProps<T>) {
   const table = useTable(
     { ...props },
+    useFilters,
     useGlobalFilter,
     useSortBy,
     useFlexLayout,
@@ -165,6 +169,93 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     table;
+
+  function getHeader(column: HeaderGroup<T>) {
+    if (!column.totalHeaderCount) {
+      return [
+        {
+          value: column.Header,
+          type: "string",
+        },
+      ];
+    }
+
+    if (column.totalHeaderCount === 1) {
+      return [
+        {
+          value: column.Header,
+          type: "string",
+        },
+      ];
+    } else {
+      const span = [...Array(column.totalHeaderCount - 1)].map((x) => ({
+        value: "",
+        type: "string",
+      }));
+      return [
+        {
+          value: column.Header,
+          type: "string",
+        },
+        ...span,
+      ];
+    }
+  }
+
+  type ExcelCell = {
+    value: string | number;
+    type: "string" | "number";
+  };
+
+  type ExcelRow = Array<ExcelCell>;
+
+  function getExcel() {
+    const config = {
+      filename: "general-ledger-Q1",
+      sheet: {
+        data: [],
+      },
+    };
+
+    const dataSet: Array<ExcelRow> = config.sheet.data;
+
+    // HEADERS
+    headerGroups.forEach((headerGroup) => {
+      const headerRow: any[] = [];
+      if (headerGroup.headers) {
+        headerGroup.headers.forEach((column) => {
+          headerRow.push(...getHeader(column));
+        });
+      }
+
+      dataSet.push(headerRow);
+    });
+
+    // FILTERED ROWS
+    if (rows.length > 0) {
+      rows.forEach((row) => {
+        const dataRow: any[] = [];
+
+        Object.values(row.values).forEach((value) =>
+          dataRow.push({
+            value,
+            type: typeof value === "number" ? "number" : "string",
+          })
+        );
+
+        dataSet.push(dataRow);
+      });
+    } else {
+      dataSet.push([
+        {
+          value: "No data",
+          type: "string",
+        },
+      ]);
+    }
+
+    return generateExcel(config);
+  }
 
   // Row Renders
   const RowRender = (table: TableInstance<T>) => {
@@ -270,113 +361,127 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
 
   return (
     <div {...getTableProps()} className="min-w-full overflow-visible ">
-      <div className="border-b-2 border-gray-100 ">
-        {/* Toolbar */}
-        <div className="p-1 flex">
-          <div className="flex items-center">
-            {/* <span className="text-xs font-bold mr-4 ml-4 self-center ">
+      {/* Toolbar */}
+      <div className="p-1 flex">
+        <div className="flex items-center">
+          {/* <span className="text-xs font-bold mr-4 ml-4 self-center ">
               Test table
             </span> */}
-            <GlobalFilter
-              preGlobalFilteredRows={table.preGlobalFilteredRows}
-              globalFilter={table.state.globalFilter}
-              setGlobalFilter={table.setGlobalFilter}
-            />
-            <FilterPanel />
-          </div>
-          <div className=" ml-auto">
-            <ExportMenu />
-            <button className=" rounded-md bg-transparent p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100">
-              <DotsVerticalIcon className="h-4 w-4 " aria-hidden="true" />
-            </button>
-          </div>
+          <GlobalFilter
+            preGlobalFilteredRows={table.preGlobalFilteredRows}
+            globalFilter={table.state.globalFilter}
+            setGlobalFilter={table.setGlobalFilter}
+          />
+          <FilterPanel<T>
+            setAllFilters={table.setAllFilters}
+            setFilter={table.setFilter}
+            filters={table.state.filters}
+          />
         </div>
-        {headerGroups.map((headerGroup) => (
-          <div {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              // Aplicamos las propiedades de ordenación a cada columna
-              <div
-                {...column.getHeaderProps({
-                  style: {
-                    minWidth: column.minWidth,
-                    width: column.width,
-                  },
-                  ...column.getSortByToggleProps(),
-                })}
-                className={`${
-                  column.isSorted ? (column.isSortedDesc ? "desc" : "asc") : ""
-                } ${
-                  column.align === "right" ? "justify-end" : "justify-start"
-                } group px-6 py-2 flex text-left text-xs font-medium text-gray-400 tracking-wider  select-none `}
-              >
-                {column.canSort ? (
-                  <div className="flex items-center justify-between">
-                    {column.render("Header")}
-                    {/* Add a sort direction indicator */}
-                    <span>
-                      {column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <ArrowDownIcon className="w-3 h-3 text-gray-400" />
-                        ) : (
-                          <ArrowUpIcon className="w-3 h-3 text-gray-400" />
-                        )
-                      ) : (
-                        <SwitchVerticalIcon className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100" />
-                      )}
-                    </span>
-                  </div>
-                ) : (
-                  <>{column.render("Header")}</>
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
+        <div className=" ml-auto">
+          <ExportMenu excelExport={getExcel} />
+          <button className=" rounded-md bg-transparent p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100">
+            <DotsVerticalIcon className="h-4 w-4 " aria-hidden="true" />
+          </button>
+        </div>
       </div>
-      {/* Apply the table body props */}
-      <div {...getTableBodyProps()}>
-        {props.pagination ? PageRowRender(table) : RowRender(table)}
-        {/*
+      {/* Overflow x container */}
+      <div className=" overflow-x-auto">
+        {/* Headers */}
+        <div className="border-b-2 border-gray-100 ">
+          {headerGroups.map((headerGroup) => (
+            <div {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column) => (
+                // Aplicamos las propiedades de ordenación a cada columna
+                <div
+                  {...column.getHeaderProps({
+                    style: {
+                      minWidth: column.minWidth,
+                      width: column.width,
+                    },
+                    ...column.getSortByToggleProps(),
+                  })}
+                  className={`${
+                    column.isSorted
+                      ? column.isSortedDesc
+                        ? "desc"
+                        : "asc"
+                      : ""
+                  } ${
+                    column.align === "right" ? "justify-end" : "justify-start"
+                  } group px-6 py-2 flex text-left text-xs font-medium text-gray-400 tracking-wider  select-none `}
+                >
+                  {column.canSort ? (
+                    <div className="flex items-center justify-between">
+                      {column.render("Header")}
+                      {/* Add a sort direction indicator */}
+                      <span>
+                        {column.isSorted ? (
+                          column.isSortedDesc ? (
+                            <ArrowDownIcon className="w-3 h-3 text-gray-400" />
+                          ) : (
+                            <ArrowUpIcon className="w-3 h-3 text-gray-400" />
+                          )
+                        ) : (
+                          <SwitchVerticalIcon className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100" />
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <>{column.render("Header")}</>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        {/* Apply the table body props */}
+        <div {...getTableBodyProps()}>
+          {props.pagination ? PageRowRender(table) : RowRender(table)}
+          {/*
         Pagination can be built however you'd like.
         This is just a very basic UI implementation:
       */}
-        {props.pagination && (
-          <div className="pagination p-1 flex gap-1 items-center">
-            <button
-              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
-              onClick={() => table.gotoPage(0)}
-              disabled={!table.canPreviousPage}
-            >
-              <ChevronDoubleLeftIcon className="h-4 w-4" aria-hidden="true" />
-            </button>{" "}
-            <button
-              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
-              onClick={() => table.previousPage()}
-              disabled={!table.canPreviousPage}
-            >
-              <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
-            </button>{" "}
-            <button
-              className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
-              onClick={() => table.nextPage()}
-              disabled={!table.canNextPage}
-            >
-              <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
-            </button>{" "}
-            <button
-              className="relative rounded-md inline-flex items-center px-2 py-2  disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
-              onClick={() => table.gotoPage(table.pageCount - 1)}
-              disabled={!table.canNextPage}
-            >
-              <ChevronDoubleRightIcon className="h-4 w-4" aria-hidden="true" />
-            </button>{" "}
-            <span className="text-xs">
-              Page{" "}
-              <strong>
-                {table.state.pageIndex + 1} of {table.pageOptions.length}
-              </strong>{" "}
-            </span>
-            {/* <span className="text-xs">
+          {props.pagination && (
+            <div className="pagination p-1 flex gap-1 items-center">
+              <button
+                className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
+                onClick={() => table.gotoPage(0)}
+                disabled={!table.canPreviousPage}
+              >
+                <ChevronDoubleLeftIcon className="h-4 w-4" aria-hidden="true" />
+              </button>{" "}
+              <button
+                className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200  text-sm font-medium text-gray-400 hover:bg-gray-50"
+                onClick={() => table.previousPage()}
+                disabled={!table.canPreviousPage}
+              >
+                <ChevronLeftIcon className="h-4 w-4" aria-hidden="true" />
+              </button>{" "}
+              <button
+                className="relative rounded-md inline-flex items-center px-2 py-2   disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
+                onClick={() => table.nextPage()}
+                disabled={!table.canNextPage}
+              >
+                <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+              </button>{" "}
+              <button
+                className="relative rounded-md inline-flex items-center px-2 py-2  disabled:bg-white disabled:text-gray-200 text-sm font-medium text-gray-400 hover:bg-gray-50"
+                onClick={() => table.gotoPage(table.pageCount - 1)}
+                disabled={!table.canNextPage}
+              >
+                <ChevronDoubleRightIcon
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                />
+              </button>{" "}
+              <span className="text-xs">
+                Page{" "}
+                <strong>
+                  {table.state.pageIndex + 1} of {table.pageOptions.length}
+                </strong>{" "}
+              </span>
+              {/* <span className="text-xs">
               | Go to page:{" "}
               <input
                 type="number"
@@ -388,21 +493,22 @@ export default function Table<T extends MinTableItem>(props: TableProps<T>) {
                 style={{ width: "100px" }}
               />
             </span>{" "} */}
-            <select
-              value={table.state.pageSize}
-              onChange={(e) => {
-                table.setPageSize(Number(e.target.value));
-              }}
-              className="text-xs border rounded-md ml-auto p-1"
-            >
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+              <select
+                value={table.state.pageSize}
+                onChange={(e) => {
+                  table.setPageSize(Number(e.target.value));
+                }}
+                className="text-xs border rounded-md ml-auto p-1"
+              >
+                {[10, 20, 30, 40, 50].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    Show {pageSize}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
